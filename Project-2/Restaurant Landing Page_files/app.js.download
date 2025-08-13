@@ -1,0 +1,1413 @@
+// Restaurant Data
+const restaurantData = {
+  restaurant: {
+    name: "Don't Mind",
+    tagline: "Your tummy, our responsibility",
+    description: "An elegant fusion of Indian soul and Continental finesse — fresh, seasonal, unforgettable.",
+    phone: "+91-XXXXXXXXXX",
+    email: "info@dontmind.com",
+    address: "123 Culinary Street, Gourmet District, Mumbai 400001",
+    hours: "Tue–Sun 12:00–23:00",
+    parking: "Valet parking available"
+  },
+  menuItems: [
+    {
+      id: 1,
+      name: "Signature Dum Biryani",
+      description: "Aromatic basmati rice with tender lamb, slow-cooked in a sealed pot",
+      price: 450,
+      category: "Indian",
+      tags: ["Signature", "Spicy"],
+      image: "🍛"
+    },
+    {
+      id: 2,
+      name: "Truffle Risotto",
+      description: "Creamy arborio rice with black truffle shavings and parmesan",
+      price: 650,
+      category: "Continental", 
+      tags: ["Vegetarian", "Chef's Pick"],
+      image: "🍚"
+    },
+    {
+      id: 3,
+      name: "Butter Chicken",
+      description: "Tender chicken in rich tomato-cashew gravy with aromatic spices",
+      price: 420,
+      category: "Indian",
+      tags: ["Popular"],
+      image: "🍗"
+    },
+    {
+      id: 4,
+      name: "Grilled Salmon",
+      description: "Atlantic salmon with lemon herb butter and seasonal vegetables",
+      price: 780,
+      category: "Continental",
+      tags: ["Healthy", "Chef's Pick"],
+      image: "🐟"
+    },
+    {
+      id: 5,
+      name: "Paneer Tikka Masala",
+      description: "Cottage cheese cubes in spiced tomato-onion gravy",
+      price: 380,
+      category: "Indian",
+      tags: ["Vegetarian", "Popular"],
+      image: "🧀"
+    },
+    {
+      id: 6,
+      name: "Beef Wellington",
+      description: "Premium beef tenderloin wrapped in puff pastry with mushroom duxelles",
+      price: 1200,
+      category: "Continental",
+      tags: ["Signature", "Premium"],
+      image: "🥩"
+    },
+    {
+      id: 7,
+      name: "Dal Makhani",
+      description: "Slow-cooked black lentils with butter, cream and aromatic spices",
+      price: 320,
+      category: "Indian",
+      tags: ["Vegetarian", "Comfort"],
+      image: "🍲"
+    },
+    {
+      id: 8,
+      name: "Lobster Thermidor",
+      description: "Fresh lobster with cognac-infused cream sauce and cheese gratinée",
+      price: 1500,
+      category: "Continental",
+      tags: ["Premium", "Signature"],
+      image: "🦞"
+    }
+  ],
+  offers: [
+    {
+      id: 1,
+      title: "Monsoon Soup Bonanza",
+      description: "2-for-1 on all soups every Monday & Wednesday",
+      validUntil: "2025-09-30",
+      badge: "Limited Time"
+    },
+    {
+      id: 2,
+      title: "Weekend Sweet Treat",
+      description: "Complimentary dessert with every main course on weekends",
+      validUntil: "2025-12-31",
+      badge: "Weekends Only"
+    },
+    {
+      id: 3,
+      title: "Happy Hours Special",
+      description: "20% off on beverages from 4 PM to 7 PM",
+      validUntil: "2025-08-31",
+      badge: "Daily"
+    }
+  ],
+  reviews: [
+    {
+      id: 1,
+      name: "Priya Sharma",
+      rating: 5,
+      comment: "Absolutely divine experience! The biryani was perfectly spiced and the service was impeccable.",
+      avatar: "P"
+    },
+    {
+      id: 2,
+      name: "Michael Johnson",
+      rating: 5,
+      comment: "Best fusion restaurant in the city. The truffle risotto was heavenly!",
+      avatar: "M"
+    },
+    {
+      id: 3,
+      name: "Anjali Patel",
+      rating: 4,
+      comment: "Great ambiance and food quality. Will definitely visit again with family.",
+      avatar: "A"
+    },
+    {
+      id: 4,
+      name: "David Chen",
+      rating: 5,
+      comment: "The chef's attention to detail is remarkable. Every dish tells a story.",
+      avatar: "D"
+    }
+  ],
+  galleryImages: [
+    {id: 1, src: "🏪", alt: "Elegant dining room with warm lighting"},
+    {id: 2, src: "👨‍🍳", alt: "Chef preparing signature dish"},
+    {id: 3, src: "🍛", alt: "Beautiful plated biryani presentation"},
+    {id: 4, src: "🍸", alt: "Modern bar area with craft cocktails"},
+    {id: 5, src: "🕯️", alt: "Private dining room for special occasions"},
+    {id: 6, src: "🥗", alt: "Fresh ingredients in the kitchen"},
+    {id: 7, src: "🍰", alt: "Dessert presentation"},
+    {id: 8, src: "🌃", alt: "Restaurant exterior at evening"}
+  ]
+};
+
+// Cart Manager Class
+class CartManager {
+    constructor() {
+        this.cart = [];
+        this.isOpen = false;
+        this.init();
+    }
+    
+    init() {
+        this.updateCartUI();
+        this.bindEvents();
+    }
+    
+    addItem(item, quantity = 1) {
+        const existingItem = this.cart.find(cartItem => cartItem.id === item.id);
+        if (existingItem) {
+            existingItem.quantity += quantity;
+        } else {
+            this.cart.push({...item, quantity: quantity});
+        }
+        this.updateCartUI();
+        this.showAddedToCartFeedback(item.name);
+        this.saveCart();
+        console.log('Added to cart:', item.name, 'Quantity:', quantity);
+        console.log('Current cart:', this.cart);
+    }
+    
+    removeItem(itemId) {
+        this.cart = this.cart.filter(item => item.id !== itemId);
+        this.updateCartUI();
+        this.saveCart();
+        console.log('Removed from cart, item ID:', itemId);
+    }
+    
+    updateQuantity(itemId, newQuantity) {
+        if (newQuantity <= 0) {
+            this.removeItem(itemId);
+            return;
+        }
+        const item = this.cart.find(cartItem => cartItem.id === itemId);
+        if (item) {
+            item.quantity = newQuantity;
+            this.updateCartUI();
+            this.saveCart();
+        }
+    }
+    
+    getSubtotal() {
+        return this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    }
+    
+    getTax() {
+        return Math.round(this.getSubtotal() * 0.05);
+    }
+    
+    getDeliveryFee() {
+        return this.cart.length > 0 ? 40 : 0;
+    }
+    
+    getTotal() {
+        return this.getSubtotal() + this.getTax() + this.getDeliveryFee();
+    }
+    
+    getTotalItems() {
+        return this.cart.reduce((sum, item) => sum + item.quantity, 0);
+    }
+    
+    checkout() {
+        if (this.cart.length === 0) {
+            showToast('Your cart is empty!', 'error');
+            return;
+        }
+        this.showBillingPage();
+    }
+    
+    showAddedToCartFeedback(itemName) {
+        showToast(`${itemName} added to cart!`);
+        triggerConfetti();
+    }
+    
+    updateCartUI() {
+        this.updateCartBadges();
+        this.updateCartDrawer();
+    }
+    
+    updateCartBadges() {
+        const totalItems = this.getTotalItems();
+        const cartBadge = document.getElementById('cartBadge');
+        const fabCartBadge = document.getElementById('fabCartBadge');
+        
+        console.log('Updating cart badges, total items:', totalItems);
+        
+        if (cartBadge) {
+            cartBadge.textContent = totalItems;
+            if (totalItems > 0) {
+                cartBadge.classList.add('show');
+            } else {
+                cartBadge.classList.remove('show');
+            }
+        }
+        
+        if (fabCartBadge) {
+            fabCartBadge.textContent = totalItems;
+            if (totalItems > 0) {
+                fabCartBadge.classList.add('show');
+            } else {
+                fabCartBadge.classList.remove('show');
+            }
+        }
+    }
+    
+    updateCartDrawer() {
+        const cartContent = document.getElementById('cartContent');
+        const cartEmpty = document.getElementById('cartEmpty');
+        const cartFooter = document.getElementById('cartFooter');
+        const cartSubtotal = document.getElementById('cartSubtotal');
+        const cartTax = document.getElementById('cartTax');
+        const cartDelivery = document.getElementById('cartDelivery');
+        const cartTotal = document.getElementById('cartTotal');
+        
+        if (!cartContent) {
+            console.error('Cart content element not found');
+            return;
+        }
+        
+        console.log('Updating cart drawer, items:', this.cart.length);
+        
+        if (this.cart.length === 0) {
+            if (cartEmpty) cartEmpty.style.display = 'block';
+            if (cartFooter) cartFooter.style.display = 'none';
+            cartContent.innerHTML = `
+                <div class="cart-empty" style="text-align: center; color: var(--dark-charcoal); padding: 2rem 0;">
+                    <p>Your cart is empty</p>
+                    <button class="btn btn--outline" onclick="scrollToMenu(); closeCart()">Browse Menu</button>
+                </div>
+            `;
+            return;
+        }
+        
+        if (cartEmpty) cartEmpty.style.display = 'none';
+        if (cartFooter) cartFooter.style.display = 'block';
+        
+        // Render cart items
+        cartContent.innerHTML = this.cart.map(item => `
+            <div class="cart-item">
+                <div class="cart-item-info">
+                    <div class="cart-item-image">${item.image}</div>
+                    <div class="cart-item-details">
+                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-price">${formatCurrency(item.price)} each</div>
+                        ${item.quantity > 1 ? `<div class="cart-item-subtotal">Subtotal: ${formatCurrency(item.price * item.quantity)}</div>` : ''}
+                    </div>
+                </div>
+                <div class="cart-item-controls">
+                    <div class="cart-quantity-control">
+                        <button class="cart-qty-btn" onclick="window.cartManager.updateQuantity(${item.id}, ${item.quantity - 1})">−</button>
+                        <span class="cart-qty-display">${item.quantity}</span>
+                        <button class="cart-qty-btn" onclick="window.cartManager.updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                    </div>
+                    <button class="cart-remove-btn" onclick="window.cartManager.removeItem(${item.id})" aria-label="Remove ${item.name}">×</button>
+                </div>
+            </div>
+        `).join('');
+        
+        // Update totals
+        const subtotal = this.getSubtotal();
+        const tax = this.getTax();
+        const delivery = this.getDeliveryFee();
+        const total = this.getTotal();
+        
+        if (cartSubtotal) cartSubtotal.textContent = formatCurrency(subtotal);
+        if (cartTax) cartTax.textContent = formatCurrency(tax);
+        if (cartDelivery) cartDelivery.textContent = formatCurrency(delivery);
+        if (cartTotal) cartTotal.textContent = formatCurrency(total);
+    }
+    
+    saveCart() {
+        // For demo purposes, just keep in memory
+        // In real app, would save to localStorage or session
+    }
+    
+    bindEvents() {
+        // Cart drawer events are handled globally
+    }
+    
+    showBillingPage() {
+        // Generate random total between ₹200-₹2000
+        const randomTotal = Math.floor(Math.random() * 1801) + 200;
+        
+        // Store original content for restoration
+        window.originalBodyContent = document.body.innerHTML;
+        
+        const billingHTML = `
+            <div class="billing-page" style="min-height: 100vh; background: var(--creamy-beige); padding: 2rem 0;">
+                <div class="container">
+                    <div class="billing-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; max-width: 1200px; margin-left: auto; margin-right: auto;">
+                        <button class="btn btn--outline" onclick="backToMenu()">← Back to Menu</button>
+                        <h1 style="margin: 0; color: var(--rich-cocoa); font-family: var(--font-headline);">Checkout</h1>
+                        <div></div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; max-width: 1200px; margin: 0 auto;">
+                        <div class="order-summary" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: var(--shadow-md); margin-bottom: 2rem;">
+                            <h2 style="margin-bottom: 1.5rem; color: var(--rich-cocoa); font-family: var(--font-headline);">Order Summary</h2>
+                            <div class="order-items" style="margin-bottom: 2rem;">
+                                ${this.cart.map(item => `
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--soft-shadow);">
+                                        <div style="display: flex; align-items: center; gap: 1rem;">
+                                            <span style="font-size: 24px;">${item.image}</span>
+                                            <div>
+                                                <div style="font-weight: 500; color: var(--rich-cocoa);">${item.name}</div>
+                                                <div style="font-size: 14px; color: var(--dark-charcoal);">Quantity: ${item.quantity}</div>
+                                            </div>
+                                        </div>
+                                        <span style="font-weight: 600; color: var(--deep-tomato);">${formatCurrency(item.price * item.quantity)}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <div style="border-top: 2px solid var(--soft-shadow); padding-top: 1rem;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Subtotal:</span>
+                                    <span>${formatCurrency(this.getSubtotal())}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Tax (5%):</span>
+                                    <span>${formatCurrency(this.getTax())}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                                    <span>Delivery:</span>
+                                    <span>${formatCurrency(this.getDeliveryFee())}</span>
+                                </div>
+                                <div class="total-animation" style="display: flex; justify-content: space-between; font-size: 20px; font-weight: 700; color: var(--deep-tomato); border-top: 1px solid var(--soft-shadow); padding-top: 1rem; font-family: var(--font-headline);">
+                                    <span>Random Demo Total:</span>
+                                    <span id="animatedTotal">₹<span id="countingNumber">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="billing-form" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: var(--shadow-md);">
+                            <h2 style="margin-bottom: 1.5rem; color: var(--rich-cocoa); font-family: var(--font-headline);">Billing Information</h2>
+                            <form id="checkoutForm">
+                                <div style="display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 1rem;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--rich-cocoa);">Full Name *</label>
+                                        <input type="text" style="width: 100%; padding: 0.75rem; border: 2px solid var(--soft-shadow); border-radius: 6px; font-family: var(--font-body);" required>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--rich-cocoa);">Phone *</label>
+                                        <input type="tel" style="width: 100%; padding: 0.75rem; border: 2px solid var(--soft-shadow); border-radius: 6px; font-family: var(--font-body);" required>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-bottom: 1rem;">
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--rich-cocoa);">Email *</label>
+                                    <input type="email" style="width: 100%; padding: 0.75rem; border: 2px solid var(--soft-shadow); border-radius: 6px; font-family: var(--font-body);" required>
+                                </div>
+                                
+                                <div style="margin-bottom: 1rem;">
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--rich-cocoa);">Delivery Address *</label>
+                                    <textarea style="width: 100%; padding: 0.75rem; border: 2px solid var(--soft-shadow); border-radius: 6px; font-family: var(--font-body); resize: vertical;" rows="3" required></textarea>
+                                </div>
+                                
+                                <div style="margin-top: 2rem;">
+                                    <h3 style="margin-bottom: 1rem; color: var(--rich-cocoa); font-family: var(--font-headline);">Payment Information</h3>
+                                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                                        <div>
+                                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--rich-cocoa);">Card Number *</label>
+                                            <input type="text" style="width: 100%; padding: 0.75rem; border: 2px solid var(--soft-shadow); border-radius: 6px; font-family: var(--font-body);" placeholder="1234 5678 9012 3456" required>
+                                        </div>
+                                        <div>
+                                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--rich-cocoa);">CVV *</label>
+                                            <input type="text" style="width: 100%; padding: 0.75rem; border: 2px solid var(--soft-shadow); border-radius: 6px; font-family: var(--font-body);" placeholder="123" maxlength="3" required>
+                                        </div>
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+                                        <div>
+                                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--rich-cocoa);">Expiry Month *</label>
+                                            <select style="width: 100%; padding: 0.75rem; border: 2px solid var(--soft-shadow); border-radius: 6px; font-family: var(--font-body);" required>
+                                                <option value="">Select Month</option>
+                                                ${Array.from({length: 12}, (_, i) => 
+                                                    `<option value="${String(i + 1).padStart(2, '0')}">${String(i + 1).padStart(2, '0')}</option>`
+                                                ).join('')}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--rich-cocoa);">Expiry Year *</label>
+                                            <select style="width: 100%; padding: 0.75rem; border: 2px solid var(--soft-shadow); border-radius: 6px; font-family: var(--font-body);" required>
+                                                <option value="">Select Year</option>
+                                                ${Array.from({length: 10}, (_, i) => 
+                                                    `<option value="${2025 + i}">${2025 + i}</option>`
+                                                ).join('')}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn--primary" style="width: 100%; height: 56px; font-size: 18px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 16px 24px; border: none; border-radius: 999px; font-family: var(--font-body); font-weight: 500; cursor: pointer; transition: all 0.3s cubic-bezier(.22,1,.36,1); background: var(--deep-tomato); color: white;">
+                                    Pay ${formatCurrency(randomTotal)} — Secure Checkout
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Keep essential elements -->
+            <div class="toast" id="toast" style="position: fixed; top: 100px; right: 24px; background: var(--rich-cocoa); color: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: var(--shadow-lg); z-index: 4000; transform: translateX(400px); transition: transform 0.3s cubic-bezier(.22,1,.36,1);">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span id="toastIcon">✓</span>
+                    <span id="toastMessage"></span>
+                </div>
+            </div>
+            <canvas class="confetti-canvas" id="confettiCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5000;"></canvas>
+        `;
+        
+        document.body.innerHTML = billingHTML;
+        
+        // Start counting animation
+        this.animateTotal(randomTotal);
+        
+        // Handle checkout form submission
+        const checkoutForm = document.getElementById('checkoutForm');
+        if (checkoutForm) {
+            checkoutForm.addEventListener('submit', (e) => this.handleCheckoutSubmission(e, randomTotal));
+        }
+    }
+    
+    animateTotal(targetAmount) {
+        const countingElement = document.getElementById('countingNumber');
+        if (!countingElement) return;
+        
+        let current = 0;
+        const increment = Math.ceil(targetAmount / 100);
+        const duration = 1500; // 1.5 seconds
+        const stepTime = duration / (targetAmount / increment);
+        
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= targetAmount) {
+                current = targetAmount;
+                clearInterval(timer);
+            }
+            countingElement.textContent = current.toLocaleString('en-IN');
+        }, stepTime);
+    }
+    
+    handleCheckoutSubmission(e, amount) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        
+        // Show loading state
+        submitBtn.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                Processing Payment...
+            </div>
+        `;
+        submitBtn.disabled = true;
+        
+        // Simulate payment processing
+        setTimeout(() => {
+            const orderNumber = Math.floor(Math.random() * 900000) + 100000;
+            this.showOrderConfirmation(orderNumber, amount);
+        }, 2000);
+    }
+    
+    showOrderConfirmation(orderNumber, amount) {
+        const confirmationHTML = `
+            <div class="order-confirmation" style="min-height: 100vh; background: var(--creamy-beige); display: flex; align-items: center; justify-content: center;">
+                <div class="container" style="max-width: 600px; text-align: center;">
+                    <div style="background: white; padding: 3rem; border-radius: 16px; box-shadow: var(--shadow-lg);">
+                        <div style="width: 80px; height: 80px; background: var(--warm-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem; font-size: 40px; color: white; animation: pulse 2s ease-in-out infinite;">✓</div>
+                        
+                        <h1 style="color: var(--rich-cocoa); margin-bottom: 1rem; font-family: var(--font-headline);">Order Confirmed!</h1>
+                        <p style="font-size: 18px; color: var(--dark-charcoal); margin-bottom: 0.5rem;">Your tasty delight is on the way.</p>
+                        <p style="font-size: 20px; font-weight: 600; color: var(--deep-tomato); margin-bottom: 2rem; font-family: var(--font-headline);">Order #${orderNumber}</p>
+                        <p style="font-size: 16px; color: var(--rich-cocoa); margin-bottom: 2rem;">Payment of ${formatCurrency(amount)} processed successfully</p>
+                        
+                        <div style="background: var(--soft-shadow); padding: 2rem; border-radius: 12px; margin-bottom: 2rem; text-align: left;">
+                            <h3 style="margin-bottom: 1rem; color: var(--rich-cocoa); font-family: var(--font-headline);">What's Next?</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">📧 Confirmation email sent</li>
+                                <li style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">🍳 Kitchen preparing your order</li>
+                                <li style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">🚚 Estimated delivery: 30-45 minutes</li>
+                                <li style="display: flex; align-items: center; gap: 0.5rem;">📞 You'll receive updates via SMS</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center;">
+                            <button class="btn btn--primary" onclick="backToMenu()" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 16px 24px; border: none; border-radius: 999px; font-family: var(--font-body); font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.3s cubic-bezier(.22,1,.36,1); background: var(--deep-tomato); color: white;">Order More</button>
+                            <button class="btn btn--outline" onclick="backToMenu()" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 16px 24px; border: 2px solid var(--deep-tomato); border-radius: 999px; font-family: var(--font-body); font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.3s cubic-bezier(.22,1,.36,1); background: transparent; color: var(--deep-tomato);">Back to Home</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <style>
+                @keyframes pulse {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                }
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            </style>
+            
+            <!-- Keep essential elements -->
+            <div class="toast" id="toast" style="position: fixed; top: 100px; right: 24px; background: var(--rich-cocoa); color: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: var(--shadow-lg); z-index: 4000; transform: translateX(400px); transition: transform 0.3s cubic-bezier(.22,1,.36,1);">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span id="toastIcon">✓</span>
+                    <span id="toastMessage"></span>
+                </div>
+            </div>
+            <canvas class="confetti-canvas" id="confettiCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5000;"></canvas>
+        `;
+        
+        document.body.innerHTML = confirmationHTML;
+        
+        // Trigger confetti
+        setTimeout(() => {
+            triggerConfetti();
+        }, 500);
+        
+        // Clear cart
+        this.cart = [];
+        this.saveCart();
+    }
+}
+
+// Global Variables
+let cartManager;
+let currentDish = null;
+let galleryIndex = 0;
+let reviewsIndex = 0;
+
+// Utility Functions
+function formatCurrency(amount) {
+  return `₹${amount.toLocaleString('en-IN')}`;
+}
+
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('toast');
+  const toastIcon = document.getElementById('toastIcon');
+  const toastMessage = document.getElementById('toastMessage');
+  
+  if (!toast || !toastIcon || !toastMessage) return;
+  
+  toastIcon.textContent = type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ️';
+  toastMessage.textContent = message;
+  
+  toast.classList.add('show');
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// Loader Management
+function hideLoader() {
+  const loader = document.getElementById('loader');
+  setTimeout(() => {
+    if (loader) {
+      loader.style.opacity = '0';
+      setTimeout(() => {
+        loader.style.display = 'none';
+      }, 500);
+    }
+  }, 1200);
+}
+
+// Navigation Functions
+function initNavigation() {
+  const header = document.getElementById('header');
+  const navToggle = document.getElementById('navToggle');
+  const navMenu = document.getElementById('navMenu');
+  
+  if (!header) return;
+  
+  // Sticky header on scroll
+  const handleScroll = debounce(() => {
+    if (window.scrollY > 100) {
+      header.classList.add('scrolled');
+    } else {
+      header.classList.remove('scrolled');
+    }
+  }, 10);
+  
+  window.addEventListener('scroll', handleScroll);
+  
+  // Mobile navigation toggle
+  if (navToggle && navMenu) {
+    navToggle.addEventListener('click', () => {
+      navMenu.classList.toggle('open');
+    });
+  }
+  
+  // Smooth scroll for navigation links
+  document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = link.getAttribute('href');
+      const targetElement = document.querySelector(targetId);
+      if (targetElement) {
+        targetElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
+  });
+}
+
+// FAB (Floating Action Button) Functions
+function initFAB() {
+  const fabContainer = document.getElementById('fabContainer');
+  const fabMain = document.getElementById('fabMain');
+  
+  if (!fabContainer || !fabMain) return;
+  
+  fabMain.addEventListener('click', () => {
+    fabContainer.classList.toggle('expanded');
+  });
+  
+  // Auto-expand on desktop
+  if (window.innerWidth >= 768) {
+    fabContainer.classList.add('expanded');
+  }
+  
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!fabContainer.contains(e.target)) {
+      fabContainer.classList.remove('expanded');
+    }
+  });
+}
+
+// Scroll Functions
+function scrollToMenu() {
+  const menuElement = document.getElementById('menu');
+  if (menuElement) {
+    menuElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+}
+
+function scrollToReservation() {
+  const reservationElement = document.getElementById('reservation');
+  if (reservationElement) {
+    reservationElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+}
+
+function scrollToOffers() {
+  const offersElement = document.getElementById('offers');
+  if (offersElement) {
+    offersElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+}
+
+// Menu Functions
+function initMenu() {
+  renderMenuItems();
+  initMenuFilters();
+}
+
+function renderMenuItems(filter = 'all') {
+  const menuGrid = document.getElementById('menuGrid');
+  if (!menuGrid) return;
+  
+  const items = restaurantData.menuItems.filter(item => {
+    switch (filter) {
+      case 'chef':
+        return item.tags.includes("Chef's Pick");
+      case 'indian':
+        return item.category === 'Indian';
+      case 'continental':
+        return item.category === 'Continental';
+      case 'vegetarian':
+        return item.tags.includes('Vegetarian');
+      default:
+        return true;
+    }
+  });
+  
+  menuGrid.innerHTML = items.map((item, index) => `
+    <div class="dish-card fade-in stagger-delay-${index % 4 + 1}" 
+         onclick="openDishModal(${item.id})" 
+         tabindex="0" 
+         role="button"
+         aria-label="View details for ${item.name}"
+         onkeypress="handleDishCardKeyPress(event, ${item.id})">
+      <div class="dish-image">
+        ${item.image}
+        <div class="dish-overlay">
+          <button class="btn btn--primary">View Details</button>
+        </div>
+      </div>
+      <div class="dish-info">
+        <h3 class="dish-name">${item.name}</h3>
+        <p class="dish-description">${item.description}</p>
+        <div class="dish-tags">
+          ${item.tags.map(tag => 
+            `<span class="dish-tag ${tag.toLowerCase().replace(/[^a-z]/g, '')}">${tag}</span>`
+          ).join('')}
+        </div>
+        <div class="dish-footer">
+          <div class="dish-price">${formatCurrency(item.price)}</div>
+          <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCartDirectly(${item.id})" aria-label="Add ${item.name} to cart">
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  
+  // Trigger fade-in animations
+  setTimeout(() => {
+    document.querySelectorAll('.dish-card.fade-in').forEach(card => {
+      card.classList.add('visible');
+    });
+  }, 100);
+}
+
+// Fixed Add to Cart Function
+function addToCartDirectly(dishId) {
+  const dish = restaurantData.menuItems.find(item => item.id === dishId);
+  if (!dish || !cartManager) {
+    console.error('Dish not found or cart manager not initialized', dishId);
+    return;
+  }
+  
+  const btn = event.target;
+  const originalText = btn.textContent;
+  
+  // Show loading state
+  btn.classList.add('loading');
+  btn.textContent = '';
+  
+  setTimeout(() => {
+    cartManager.addItem(dish, 1);
+    
+    // Show success state
+    btn.classList.remove('loading');
+    btn.classList.add('success');
+    btn.textContent = '✓ Added!';
+    
+    // Reset button after delay
+    setTimeout(() => {
+      btn.classList.remove('success');
+      btn.textContent = originalText;
+    }, 1000);
+  }, 300);
+}
+
+function initMenuFilters() {
+  const filterButtons = document.querySelectorAll('.filter-btn');
+  
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Update active state
+      filterButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      // Filter menu items
+      const filter = btn.getAttribute('data-filter');
+      renderMenuItems(filter);
+    });
+  });
+}
+
+function handleDishCardKeyPress(event, dishId) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    openDishModal(dishId);
+  }
+}
+
+// Dish Modal Functions  
+function openDishModal(dishId) {
+  const dish = restaurantData.menuItems.find(item => item.id === dishId);
+  if (!dish) {
+    console.error('Dish not found:', dishId);
+    return;
+  }
+  
+  currentDish = dish;
+  
+  const modal = document.getElementById('dishModal');
+  const title = document.getElementById('dishModalTitle');
+  const image = document.getElementById('dishModalImage');
+  const description = document.getElementById('dishModalDescription');
+  const tags = document.getElementById('dishModalTags');
+  const price = document.getElementById('dishModalPrice');
+  const quantity = document.getElementById('modalQuantity');
+  
+  if (!modal || !title || !image || !description || !tags || !price || !quantity) {
+    console.error('Modal elements not found');
+    return;
+  }
+  
+  title.textContent = dish.name;
+  image.textContent = dish.image;
+  description.textContent = dish.description;
+  price.textContent = formatCurrency(dish.price);
+  quantity.value = 1;
+  
+  tags.innerHTML = dish.tags.map(tag => 
+    `<span class="dish-tag ${tag.toLowerCase().replace(/[^a-z]/g, '')}">${tag}</span>`
+  ).join('');
+  
+  modal.classList.remove('hidden');
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  
+  console.log('Opened modal for dish:', dish.name);
+  
+  // Focus management
+  const firstFocusable = modal.querySelector('.modal-close');
+  if (firstFocusable) firstFocusable.focus();
+}
+
+function closeDishModal() {
+  const modal = document.getElementById('dishModal');
+  if (modal) {
+    modal.classList.remove('open');
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+  currentDish = null;
+}
+
+function increaseQuantity() {
+  const quantityInput = document.getElementById('modalQuantity');
+  if (quantityInput) {
+    quantityInput.value = parseInt(quantityInput.value) + 1;
+  }
+}
+
+function decreaseQuantity() {
+  const quantityInput = document.getElementById('modalQuantity');
+  if (quantityInput) {
+    const currentValue = parseInt(quantityInput.value);
+    if (currentValue > 1) {
+      quantityInput.value = currentValue - 1;
+    }
+  }
+}
+
+function addToCartFromModal() {
+  if (!currentDish || !cartManager) {
+    console.error('No current dish or cart manager not initialized');
+    return;
+  }
+  
+  const quantityInput = document.getElementById('modalQuantity');
+  const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+  
+  cartManager.addItem(currentDish, quantity);
+  closeDishModal();
+}
+
+// Cart Functions
+function openCart() {
+  const cartDrawer = document.getElementById('cartDrawer');
+  if (cartDrawer) {
+    cartDrawer.classList.add('open');
+    if (cartManager) {
+      cartManager.updateCartDrawer();
+    }
+  }
+  console.log('Opening cart drawer');
+}
+
+function closeCart() {
+  const cartDrawer = document.getElementById('cartDrawer');
+  if (cartDrawer) {
+    cartDrawer.classList.remove('open');
+  }
+}
+
+function proceedToCheckout() {
+  if (!cartManager) {
+    console.error('Cart manager not initialized');
+    return;
+  }
+  
+  closeCart();
+  cartManager.checkout();
+}
+
+function backToMenu() {
+  // Restore original content and reinitialize
+  if (window.originalBodyContent) {
+    document.body.innerHTML = window.originalBodyContent;
+  } else {
+    location.reload();
+    return;
+  }
+  
+  // Reinitialize the application
+  setTimeout(() => {
+    init();
+  }, 100);
+}
+
+// Gallery Functions
+function initGallery() {
+  const track = document.querySelector('.gallery-track');
+  const thumbnailsContainer = document.getElementById('galleryThumbnails');
+  const prevBtn = document.getElementById('galleryPrev');
+  const nextBtn = document.getElementById('galleryNext');
+  
+  if (!track || !thumbnailsContainer || !prevBtn || !nextBtn) return;
+  
+  // Render gallery items
+  track.innerHTML = restaurantData.galleryImages.map(image => `
+    <div class="gallery-item">${image.src}</div>
+  `).join('');
+  
+  // Render thumbnails
+  thumbnailsContainer.innerHTML = restaurantData.galleryImages.map((image, index) => `
+    <div class="gallery-thumbnail ${index === 0 ? 'active' : ''}" 
+         onclick="goToGallerySlide(${index})"
+         role="button"
+         tabindex="0"
+         aria-label="${image.alt}">
+      ${image.src}
+    </div>
+  `).join('');
+  
+  // Navigation buttons
+  prevBtn.addEventListener('click', () => navigateGallery(-1));
+  nextBtn.addEventListener('click', () => navigateGallery(1));
+  
+  updateGalleryDisplay();
+}
+
+function navigateGallery(direction) {
+  const maxIndex = restaurantData.galleryImages.length - 1;
+  galleryIndex += direction;
+  
+  if (galleryIndex < 0) galleryIndex = maxIndex;
+  if (galleryIndex > maxIndex) galleryIndex = 0;
+  
+  updateGalleryDisplay();
+}
+
+function goToGallerySlide(index) {
+  galleryIndex = index;
+  updateGalleryDisplay();
+}
+
+function updateGalleryDisplay() {
+  const track = document.querySelector('.gallery-track');
+  const thumbnails = document.querySelectorAll('.gallery-thumbnail');
+  
+  if (track) {
+    track.style.transform = `translateX(-${galleryIndex * 100}%)`;
+  }
+  
+  thumbnails.forEach((thumb, index) => {
+    thumb.classList.toggle('active', index === galleryIndex);
+  });
+}
+
+// Reviews Functions
+function initReviews() {
+  const track = document.querySelector('.reviews-track');
+  const prevBtn = document.getElementById('reviewsPrev');
+  const nextBtn = document.getElementById('reviewsNext');
+  
+  if (!track || !prevBtn || !nextBtn) return;
+  
+  // Render reviews
+  track.innerHTML = restaurantData.reviews.map(review => `
+    <div class="review-card">
+      <div class="review-avatar">${review.avatar}</div>
+      <div class="review-name">${review.name}</div>
+      <div class="review-rating">
+        ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
+      </div>
+      <div class="review-comment">"${review.comment}"</div>
+    </div>
+  `).join('');
+  
+  // Navigation
+  prevBtn.addEventListener('click', () => navigateReviews(-1));
+  nextBtn.addEventListener('click', () => navigateReviews(1));
+  
+  // Auto-advance reviews
+  setInterval(() => navigateReviews(1), 5000);
+  
+  updateReviewsDisplay();
+}
+
+function navigateReviews(direction) {
+  const maxIndex = Math.max(0, restaurantData.reviews.length - getVisibleReviews());
+  reviewsIndex += direction;
+  
+  if (reviewsIndex < 0) reviewsIndex = maxIndex;
+  if (reviewsIndex > maxIndex) reviewsIndex = 0;
+  
+  updateReviewsDisplay();
+}
+
+function getVisibleReviews() {
+  return window.innerWidth >= 1024 ? 3 : window.innerWidth >= 768 ? 2 : 1;
+}
+
+function updateReviewsDisplay() {
+  const track = document.querySelector('.reviews-track');
+  if (track) {
+    const cardWidth = 350 + 24; // card width + gap
+    const offset = reviewsIndex * cardWidth;
+    track.style.transform = `translateX(-${offset}px)`;
+  }
+}
+
+function openReviewsModal() {
+  // Create a simple modal showing all reviews
+  const modalHTML = `
+    <div class="modal open" id="reviewsModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>All Reviews</h3>
+          <button class="modal-close" onclick="closeReviewsModal()">×</button>
+        </div>
+        <div class="modal-body">
+          ${restaurantData.reviews.map(review => `
+            <div class="review-item" style="margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--soft-shadow);">
+              <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                <div class="review-avatar">${review.avatar}</div>
+                <div>
+                  <div class="review-name">${review.name}</div>
+                  <div class="review-rating">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
+                </div>
+              </div>
+              <div class="review-comment">"${review.comment}"</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+function closeReviewsModal() {
+  const modal = document.getElementById('reviewsModal');
+  if (modal) modal.remove();
+}
+
+// Offers Functions
+function initOffers() {
+  const offersGrid = document.getElementById('offersGrid');
+  if (!offersGrid) return;
+  
+  offersGrid.innerHTML = restaurantData.offers.map(offer => `
+    <div class="offer-card">
+      <div class="offer-badge">${offer.badge}</div>
+      <h3 class="offer-title">${offer.title}</h3>
+      <p class="offer-description">${offer.description}</p>
+      <p class="offer-validity">Valid until: ${new Date(offer.validUntil).toLocaleDateString('en-IN')}</p>
+      <button class="offer-btn" onclick="claimOffer(${offer.id})">Claim Offer</button>
+    </div>
+  `).join('');
+}
+
+function claimOffer(offerId) {
+  const offer = restaurantData.offers.find(o => o.id === offerId);
+  if (offer) {
+    showToast(`${offer.title} claimed! Check your email for details.`);
+    triggerConfetti();
+  }
+}
+
+// Reservation Functions
+function initReservation() {
+  const form = document.getElementById('reservationForm');
+  const dateInput = document.getElementById('date');
+  
+  if (!form || !dateInput) return;
+  
+  // Set minimum date to today
+  const today = new Date().toISOString().split('T')[0];
+  dateInput.min = today;
+  
+  form.addEventListener('submit', handleReservationSubmission);
+}
+
+async function handleReservationSubmission(e) {
+  e.preventDefault();
+  
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData.entries());
+  
+  // Validate form
+  if (!validateReservationForm(data)) {
+    return;
+  }
+  
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  const originalText = submitBtn.textContent;
+  
+  submitBtn.textContent = 'Reserving...';
+  submitBtn.disabled = true;
+  
+  try {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    showToast('Table Reserved! A confirmation message has been sent.');
+    triggerConfetti();
+    e.target.reset();
+    
+    // Reset date minimum
+    const dateInput = document.getElementById('date');
+    if (dateInput) {
+      dateInput.min = new Date().toISOString().split('T')[0];
+    }
+  } catch (error) {
+    showToast('Something went wrong. Please try again.', 'error');
+  } finally {
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+  }
+}
+
+function validateReservationForm(data) {
+  let isValid = true;
+  
+  // Clear previous errors
+  document.querySelectorAll('.form-error').forEach(error => {
+    error.textContent = '';
+  });
+  
+  // Validate required fields
+  if (!data.name?.trim()) {
+    showFieldError('nameError', 'Name is required');
+    isValid = false;
+  }
+  
+  if (!data.phone?.trim()) {
+    showFieldError('phoneError', 'Phone number is required');
+    isValid = false;
+  } else if (!/^\+?[\d\s-()]+$/.test(data.phone)) {
+    showFieldError('phoneError', 'Please enter a valid phone number');
+    isValid = false;
+  }
+  
+  if (!data.date) {
+    showFieldError('dateError', 'Date is required');
+    isValid = false;
+  } else {
+    const selectedDate = new Date(data.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+      showFieldError('dateError', 'Please select a future date');
+      isValid = false;
+    }
+  }
+  
+  return isValid;
+}
+
+function showFieldError(elementId, message) {
+  const errorElement = document.getElementById(elementId);
+  if (errorElement) {
+    errorElement.textContent = message;
+  }
+}
+
+// Confetti Animation
+function triggerConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  if (!canvas) return;
+  
+  const ctx = canvas.getContext('2d');
+  
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  
+  const particles = [];
+  const colors = ['#A72B2B', '#D9A441', '#6B3F2B', '#F6EFE6'];
+  const shapes = ['🍕', '🍛', '☕', '🍴', '🧁'];
+  
+  // Create particles
+  for (let i = 0; i < 50; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: -10,
+      velocityX: (Math.random() - 0.5) * 6,
+      velocityY: Math.random() * 3 + 2,
+      size: Math.random() * 10 + 5,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      shape: shapes[Math.floor(Math.random() * shapes.length)],
+      rotation: Math.random() * 360,
+      rotationSpeed: (Math.random() - 0.5) * 10,
+      gravity: 0.6,
+      decay: 0.98,
+      opacity: 1
+    });
+  }
+  
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const particle = particles[i];
+      
+      // Update position
+      particle.velocityY += particle.gravity;
+      particle.x += particle.velocityX;
+      particle.y += particle.velocityY;
+      particle.rotation += particle.rotationSpeed;
+      
+      // Apply decay
+      particle.velocityX *= particle.decay;
+      particle.velocityY *= particle.decay;
+      particle.opacity *= 0.995;
+      
+      // Draw particle
+      ctx.save();
+      ctx.translate(particle.x, particle.y);
+      ctx.rotate(particle.rotation * Math.PI / 180);
+      ctx.globalAlpha = particle.opacity;
+      ctx.font = `${particle.size}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.fillText(particle.shape, 0, 0);
+      ctx.restore();
+      
+      // Remove dead particles
+      if (particle.y > canvas.height + 100 || particle.opacity < 0.01) {
+        particles.splice(i, 1);
+      }
+    }
+    
+    if (particles.length > 0) {
+      requestAnimationFrame(animate);
+    }
+  }
+  
+  animate();
+}
+
+// Privacy and Terms Functions
+function showPrivacyPolicy() {
+  showToast('Privacy Policy would be displayed here in a real application.', 'info');
+}
+
+function showTerms() {
+  showToast('Terms of Service would be displayed here in a real application.', 'info');
+}
+
+// Event Listeners for Modal and Cart Closing
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    // Close any open modals
+    const openModal = document.querySelector('.modal.open');
+    if (openModal) {
+      if (openModal.id === 'dishModal') {
+        closeDishModal();
+      } else if (openModal.id === 'reviewsModal') {
+        closeReviewsModal();
+      }
+    }
+    
+    // Close cart
+    const cartDrawer = document.getElementById('cartDrawer');
+    if (cartDrawer && cartDrawer.classList.contains('open')) {
+      closeCart();
+    }
+  }
+});
+
+// Click outside to close modals and cart
+document.addEventListener('click', (e) => {
+  // Close cart when clicking outside
+  const cartDrawer = document.getElementById('cartDrawer');
+  if (cartDrawer && cartDrawer.classList.contains('open') && !cartDrawer.contains(e.target) && !e.target.closest('[onclick*="openCart"]') && !e.target.closest('.cart-trigger') && !e.target.closest('.cart-fab')) {
+    closeCart();
+  }
+  
+  // Close modals when clicking on backdrop
+  if (e.target.classList.contains('modal')) {
+    if (e.target.id === 'dishModal') {
+      closeDishModal();
+    } else if (e.target.id === 'reviewsModal') {
+      closeReviewsModal();
+    }
+  }
+});
+
+// Responsive handlers
+function handleResize() {
+  // Update gallery display
+  updateGalleryDisplay();
+  updateReviewsDisplay();
+  
+  // Update FAB for mobile/desktop
+  const fabContainer = document.getElementById('fabContainer');
+  if (fabContainer) {
+    if (window.innerWidth >= 768) {
+      fabContainer.classList.add('expanded');
+    } else {
+      fabContainer.classList.remove('expanded');
+    }
+  }
+}
+
+window.addEventListener('resize', debounce(handleResize, 250));
+
+// Initialize Application
+function init() {
+  // Hide loader after assets load
+  hideLoader();
+  
+  // Initialize cart manager - make it globally accessible
+  cartManager = new CartManager();
+  window.cartManager = cartManager; // Make accessible globally
+  
+  // Initialize all components
+  initNavigation();
+  initFAB();
+  initMenu();
+  initGallery();
+  initReviews();
+  initOffers();
+  initReservation();
+  
+  console.log('Don\'t Mind Restaurant App Initialized with Working Cart System');
+}
+
+// Start the application when DOM is ready
+document.addEventListener('DOMContentLoaded', init);
